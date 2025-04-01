@@ -1,0 +1,6 @@
+2025-04-01 11:43:36.706714+05:30 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "show [*]datbases"; SQL statement:
+show datbases [42000-232]
+2025-04-01 13:17:12.718069+05:30 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "INFORMATION_ENTRY" not found; SQL statement:
+select * from information_entry [42102-232]

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <title>Journal Entries</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h2>Your Journal Entries</h2>
+      <a href="/journals/new">+ New Entry</a>
+      <ul class="entry-list">
+        <li th:each="entry : ${entries}">
+          <a th:href="@{|/journals/${entry.id}|}" th:text="${entry.title}"></a>
+          <span> [<b th:text="${entry.status}"></b>]</span>
+        </li>
+      </ul>
+    </div>
+  </body>
+</html>

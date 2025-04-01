@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <title th:text="${entry.id} == null ? 'New Entry' : 'Edit Entry'">
+      Journal
+    </title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h2
+        th:text="${entry.id} == null ? 'Create New Journal Entry' : 'Edit Journal Entry'"
+      ></h2>
+      <form th:action="@{/journals/save}" th:object="${entry}" method="post">
+        <input type="hidden" th:field="*{id}" />
+        <input type="hidden" th:field="*{status}" />
+        <input type="hidden" th:field="*{createdAt}" />
+        <input type="hidden" th:field="*{date}" />
+
+        <label>Title</label>
+        <input type="text" th:field="*{title}" required />
+
+        <label>Content</label>
+        <textarea th:field="*{content}" rows="8" required></textarea>
+
+        <label>Privacy</label>
+        <select th:field="*{privacySetting}">
+          <option value="PRIVATE">Private</option>
+          <option value="SHARED">Shared with Therapist</option>
+        </select>
+
+        <button type="submit">Save</button>
+      </form>
+    </div>
+  </body>
+</html>
