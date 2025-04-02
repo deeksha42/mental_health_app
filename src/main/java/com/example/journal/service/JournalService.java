@@ -30,6 +30,10 @@ public class JournalService {
         return repo.save(entry);
     }
 
+    public void delete(Long id) {
+        repo.deleteById(id);
+    }
+
     public boolean isEditable(JournalEntry entry) {
         LocalDate today = LocalDate.now();
         return entry.getStatus() == EntryStatus.DRAFT && entry.getDate().isEqual(today);

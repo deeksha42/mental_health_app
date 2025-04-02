@@ -61,6 +61,12 @@ public class JournalController {
         return "redirect:/journals";
     }
 
+    @PostMapping("/delete/{id}")
+    public String deleteEntry(@PathVariable Long id) {
+        service.delete(id);
+        return "redirect:/journals";
+    }
+
     @GetMapping("/{id}")
     public String viewEntry(@PathVariable Long id, Model model) {
         JournalEntry entry = service.getById(id);

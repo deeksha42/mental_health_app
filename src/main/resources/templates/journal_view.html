@@ -15,15 +15,23 @@
       <p><strong>Status:</strong> <span th:text="${entry.status}"></span></p>
       <p th:text="${entry.content}"></p>
 
-      <div th:if="${editable}">
-        <form th:action="@{|/journals/finalize/${entry.id}|}" method="post">
-          <button type="submit">Finalize and Save</button>
+      <div class="actions">
+        <form
+          th:if="${editable}"
+          th:action="@{|/journals/finalize/${entry.id}|}"
+          method="post"
+        >
+          <button class="btn finalize" type="submit">Finalize and Save</button>
         </form>
-        <a th:href="@{|/journals/edit/${entry.id}|}"><button>Edit</button></a>
+        <a th:if="${editable}" th:href="@{|/journals/edit/${entry.id}|}">
+          <button class="btn edit">Edit</button>
+        </a>
+        <form th:action="@{|/journals/delete/${entry.id}|}" method="post">
+          <button class="btn delete" type="submit">Delete</button>
+        </form>
       </div>
 
-      <br />
-      <a href="/journals">← Back to entries</a>
+      <a href="/journals" class="back">← Back to entries</a>
     </div>
   </body>
 </html>

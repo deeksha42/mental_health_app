@@ -7,11 +7,11 @@
   <body>
     <div class="container">
       <h2>Your Journal Entries</h2>
-      <a href="/journals/new">+ New Entry</a>
+      <a href="/journals/new" class="btn create">+ New Entry</a>
       <ul class="entry-list">
-        <li th:each="entry : ${entries}">
+        <li th:each="entry : ${entries}" class="card">
           <a th:href="@{|/journals/${entry.id}|}" th:text="${entry.title}"></a>
-          <span> [<b th:text="${entry.status}"></b>]</span>
+          <span class="status" th:text="${entry.status}"></span>
         </li>
       </ul>
     </div>
