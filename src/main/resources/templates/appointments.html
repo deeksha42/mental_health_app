@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Appointments</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .appointment-card {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            max-width: 600px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .appointment-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .appointment-info {
+            margin-bottom: 12px;
+            display: flex;
+        }
+        .appointment-info strong {
+            min-width: 120px;
+            display: inline-block;
+        }
+        .session-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+        .session-btn:hover {
+            background-color: #45a049;
+        }
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .status-scheduled {
+            background-color: #e3f2fd;
+            color: #1565c0;
+        }
+        .status-in-progress {
+            background-color: #fff3e0;
+            color: #e65100;
+        }
+        .status-completed {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .welcome-message {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Your Appointments</h1>
+    <p class="welcome-message">Welcome, <strong th:text="${clientName}"></strong>!</p>
+
+    <div th:each="appointment : ${appointments}" class="appointment-card" 
+         th:onclick="'window.location.href=\'/appointments/view/' + ${appointment.id} + '\''">
+        <div class="appointment-info">
+            <strong>Therapist:</strong> 
+            <span th:text="${appointment.therapist.name}"></span>
+        </div>
+        <div class="appointment-info">
+            <strong>Date:</strong> 
+            <span th:text="${#temporals.format(appointment.dateTime, 'MMMM dd, yyyy')}"></span>
+        </div>
+        <div class="appointment-info">
+            <strong>Time:</strong> 
+            <span th:text="${#temporals.format(appointment.dateTime, 'hh:mm a')}"></span>
+        </div>
+        <div class="appointment-info">
+            <strong>Duration:</strong> 
+            <span th:if="${appointment.duration != null}" 
+                  th:text="${appointment.duration + ' minutes'}"></span>
+            <span th:unless="${appointment.duration != null}">-</span>
+        </div>
+        <div class="appointment-info">
+            <strong>Status:</strong>
+            <span th:classappend="'status-' + ${#strings.toLowerCase(appointment.status)}" 
+                  class="status" th:text="${#strings.capitalize(#strings.toLowerCase(appointment.status).replace('_', ' '))}">
+            </span>
+        </div>
+
+        <div th:if="${appointment.status == 'SCHEDULED'}">
+            <form th:action="@{/appointments/start/{id}(id=${appointment.id})}" method="post">
+                <button type="submit" class="session-btn">Start Session</button>
+            </form>
+        </div>
+    </div>
+
+    <a href="/" class="back-link">← Back to Home</a>
+</body>
+</html>

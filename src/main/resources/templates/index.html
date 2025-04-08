@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome</title>
+    <style>
+        .button-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to Therapist Appointment System!</h1>
+    <div class="button-container">
+        <button onclick="window.location.href='/therapists'">Book a Therapist</button>
+        <button onclick="window.location.href='/therapist/login'">Therapist Login</button>
+        <button onclick="window.location.href='/resources'">Self-Help Resources</button>
+    </div>
+</body>
+</html>
