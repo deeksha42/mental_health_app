@@ -4,8 +4,6 @@ import com.mentalhealth.therapistappointment.model.Appointment;
 import com.mentalhealth.therapistappointment.model.Therapist;
 import com.mentalhealth.therapistappointment.repository.AppointmentRepository;
 import com.mentalhealth.therapistappointment.repository.TherapistRepository;
-import com.mentalhealth.therapistappointment.util.AppointmentFactory;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -25,16 +23,16 @@ public class AppointmentController {
     private final TherapistRepository therapistRepository;
 
     public AppointmentController(AppointmentRepository appointmentRepository,
-                                 TherapistRepository therapistRepository) {
+                               TherapistRepository therapistRepository) {
         this.appointmentRepository = appointmentRepository;
         this.therapistRepository = therapistRepository;
     }
 
     @PostMapping("/book")
     public String bookAppointment(@RequestParam Long therapistId,
-                                  @RequestParam String clientName,
-                                  @RequestParam String appointmentDate,
-                                  @RequestParam String timeSlot) {
+                                @RequestParam String clientName,
+                                @RequestParam String appointmentDate,
+                                @RequestParam String timeSlot) {
         Optional<Therapist> therapist = therapistRepository.findById(therapistId);
         if (therapist.isPresent()) {
             LocalDate date = LocalDate.parse(appointmentDate);
@@ -42,10 +40,10 @@ public class AppointmentController {
             LocalDateTime appointmentDateTime = LocalDateTime.of(date, time);
 
             Appointment appointment = AppointmentFactory.createAppointment(
-                    clientName,
-                    appointmentDateTime,
-                    therapist.get(),
-                    Appointment.Status.SCHEDULED
+                clientName,
+                appointmentDateTime,
+                therapist.get(),
+                Appointment.Status.SCHEDULED
             );
             appointmentRepository.save(appointment);
         }
@@ -104,5 +102,14 @@ public class AppointmentController {
         }
 
         return "redirect:/appointments/history";
+    }
+}
+
+class AppointmentFactory {
+    public static Appointment createAppointment(String clientName, LocalDateTime dateTime,
+                                              Therapist therapist, Appointment.Status status) {
+        Appointment appointment = new Appointment(clientName, dateTime, therapist);
+        appointment.setStatus(status);
+        return appointment;
     }
 }
