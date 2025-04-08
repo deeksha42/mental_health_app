@@ -2,6 +2,7 @@ package com.example.journal.controller;
 
 import com.example.journal.model.EntryStatus;
 import com.example.journal.model.JournalEntry;
+import com.example.journal.model.JournalEntryBuilder;
 import com.example.journal.service.JournalService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,10 +29,11 @@ public class JournalController {
 
     @GetMapping("/new")
     public String showForm(Model model) {
-        JournalEntry entry = new JournalEntry();
-        entry.setStatus(EntryStatus.DRAFT);
-        entry.setDate(LocalDate.now());
-        entry.setCreatedAt(LocalDateTime.now());
+        JournalEntry entry = JournalEntryBuilder.builder()
+                .status(EntryStatus.DRAFT)
+                .date(LocalDate.now())
+                .createdAt(LocalDateTime.now())
+                .build();
         model.addAttribute("entry", entry);
         return "journal_form";
     }
