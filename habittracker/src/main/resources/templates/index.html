@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Habit Tracker</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .progress-container {
+            width: 150px;
+            height: 20px;
+            background-color: #ddd;
+            border-radius: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        .progress-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            z-index: 1;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            overflow-x: auto;
+        }
+        th, td {
+            border: 1px solid #aaa;
+            padding: 4px;
+            text-align: center;
+        }
+        th.sticky {
+            position: sticky;
+            top: 0;
+            background-color: #f5f5f5;
+            z-index: 2;
+        }
+        .nav-button-cell {
+            width: 100px;
+        }
+        .right-nav-button {
+            position: sticky;
+            right: 0;
+            background-color: #f5f5f5;
+            z-index: 2;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Add New Habit</h2>
+<form id="addHabitForm">
+    <input type="text" id="habitName" placeholder="Name" required>
+    <input type="number" id="habitGoal" placeholder="Goal" required>
+    <button type="submit">Add</button>
+</form>
+
+<h2>Update Habit</h2>
+<form id="updateHabitForm">
+    <input type="text" id="updateName" placeholder="Name" required>
+    <input type="date" id="updateDate" required>
+    <button type="submit">Update</button>
+</form>
+
+<h2>Habits</h2>
+
+<div style="overflow-x:auto;">
+    <table id="habitTable">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Goal</th>
+            <th>Progress</th>
+            <th class="sticky nav-button-cell">
+                <button onclick="prevWeek()">⬅️ Prev</button>
+            </th>
+            <!-- Dates and right arrow will be injected here -->
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<script>
+    const allDates = [];
+    for (let i = 1; i <= 30; i++) {
+        allDates.push(`2025-04-${i.toString().padStart(2, '0')}`);
+    }
+
+    let currentWeekIndex = 0;
+    const daysPerWeek = 7;
+
+    function getWeekDates() {
+        const start = currentWeekIndex * daysPerWeek;
+        return allDates.slice(start, start + daysPerWeek);
+    }
+
+    function renderTable(habits) {
+        const tbody = $("#habitTable tbody").empty();
+        const theadRow = $("#habitTable thead tr");
+
+        // Clear all date headers except first 4 fixed headers
+        theadRow.find("th:gt(3)").remove();
+
+        const weekDates = getWeekDates();
+
+        // Add date headers
+        weekDates.forEach(date => {
+            const day = parseInt(date.split("-")[2]);
+            theadRow.append(`<th class="sticky">Apr ${day}</th>`);
+        });
+
+        // Add Next button at right
+        theadRow.append(`<th class="sticky right-nav-button"><button onclick="nextWeek()">Next ➡️</button></th>`);
+
+        habits.forEach(habit => {
+            const progress = (habit.completedDates.length / habit.goal) * 100;
+            const progressColor = progress >= 100 ? 'green' : progress > 50 ? 'yellow' : 'red';
+
+            const row = $("<tr></tr>");
+            row.append(`<td>${habit.name}</td>`);
+            row.append(`<td>${habit.goal}</td>`);
+            row.append(`
+                <td>
+                    <div class="progress-container" title="${Math.round(progress)}%">
+                        <div class="progress-bar" style="width:${progress}%; background:${progressColor}"></div>
+                        <div class="progress-text">${habit.completedDates.length}/${habit.goal}</div>
+                    </div>
+                </td>
+            `);
+
+            // Empty gap cell (to align with Prev button)
+            row.append(`<td></td>`);
+
+            // Tick marks for current week
+            weekDates.forEach(date => {
+                const tick = habit.completedDates.includes(date) ? '✔️' : '';
+                row.append(`<td>${tick}</td>`);
+            });
+
+            // Final gap for next button
+            row.append(`<td></td>`);
+
+            tbody.append(row);
+        });
+    }
+
+    function fetchHabits() {
+        $.get("/api/habits", function(data) {
+            renderTable(data);
+        });
+    }
+
+    function prevWeek() {
+        if (currentWeekIndex > 0) {
+            currentWeekIndex--;
+            fetchHabits();
+        }
+    }
+
+    function nextWeek() {
+        const maxWeek = Math.floor((allDates.length - 1) / daysPerWeek);
+        if (currentWeekIndex < maxWeek) {
+            currentWeekIndex++;
+            fetchHabits();
+        }
+    }
+
+    $("#addHabitForm").submit(function(e) {
+        e.preventDefault();
+        const habit = {
+            name: $("#habitName").val(),
+            goal: parseInt($("#habitGoal").val())
+        };
+        $.ajax({
+            url: "/api/habits/add",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(habit),
+            success: function() {
+                fetchHabits();
+                $("#addHabitForm")[0].reset();
+            },
+            error: function(xhr) {
+                alert("Failed to add habit: " + (xhr.responseJSON?.error || "unknown error"));
+            }
+        });
+    });
+
+    $("#updateHabitForm").submit(function(e) {
+        e.preventDefault();
+        const updateData = {
+            name: $("#updateName").val(),
+            date: $("#updateDate").val()
+        };
+        $.ajax({
+            url: "/api/habits/update",
+            type: "POST",
+            data: JSON.stringify(updateData),
+            contentType: "application/json",
+            success: function() {
+                fetchHabits();
+            },
+            error: function() {
+                alert("Error updating habit");
+            }
+        });
+    });
+
+    fetchHabits();
+</script>
+
+</body>
+</html>
