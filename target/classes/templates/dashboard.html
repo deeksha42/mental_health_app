@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        display: flex;
+        background-color: #f5f5f5;
+      }
+      .sidebar {
+        width: 250px;
+        height: 100vh;
+        background-color: rgb(53, 32, 108);
+        padding-top: 20px;
+        position: fixed;
+        left: 0;
+        top: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: white;
+      }
+      .sidebar h2 {
+        margin-bottom: 20px;
+        text-align: center;
+      }
+      .sidebar a {
+        color: white;
+        text-decoration: none;
+        padding: 15px;
+        display: block;
+        width: 100%;
+        text-align: center;
+        font-size: 18px;
+      }
+      .sidebar a:hover {
+        background-color: #3e8e41;
+      }
+      .content {
+        margin-left: 260px;
+        padding: 20px;
+        width: calc(100% - 260px);
+        text-align: center;
+      }
+      .graphs {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+      }
+      .graph-container {
+        flex: 1;
+        max-width: 33%;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        padding: 10px;
+      }
+      canvas {
+        width: 100%;
+        height: 300px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <h2>Mental Health Platform</h2>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/mood-tracking">Mood Tracking</a>
+      <a href="/journals">Journaling</a>
+      <a href="/analytics">Analytics</a>
+      <a href="/meditation">Meditation</a>
+	  <a href="/therapists">Therapist booking</a>
+	  <a href="/resources">Self Help Resources</a>
+	  <!-- <a href="/index">Therapist Login</a> -->
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+      <h1>Dashboard</h1>
+      <div class="graphs">
+        <div class="graph-container">
+          <canvas id="moodChart"></canvas>
+        </div>
+        <div class="graph-container">
+          <canvas id="sleepChart"></canvas>
+        </div>
+        <div class="graph-container">
+          <canvas id="energyChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      async function fetchMoodData() {
+        try {
+          const response = await fetch("http://localhost:8080/api/mood/all");
+          const data = await response.json();
+          processMoodData(data);
+        } catch (error) {
+          console.error("Error fetching mood data:", error);
+        }
+      }
+
+      function processMoodData(moodEntries) {
+        const moodScale = {
+          Happy: 5,
+          Excited: 4,
+          Neutral: 3,
+          Stressed: 2,
+          Anxious: 1,
+        };
+
+        // Sort entries by date and take last 7 days
+        moodEntries.sort((a, b) => new Date(a.date) - new Date(b.date));
+        const last7Days = moodEntries.slice(-7);
+
+        const labels = last7Days.map((entry) => entry.date);
+        const moods = last7Days.map((entry) => moodScale[entry.mood] || 3);
+        const sleepData = last7Days.map((entry) => entry.sleep);
+        const energyData = last7Days.map((entry) => entry.energy);
+
+        generateCharts(labels, moods, sleepData, energyData);
+      }
+
+      function generateCharts(labels, moods, sleepData, energyData) {
+        new Chart(document.getElementById("moodChart").getContext("2d"), {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Mood (Scale 1-5)",
+                data: moods,
+                backgroundColor: "rgba(75, 192, 192, 0.2)",
+                borderColor: "rgba(75, 192, 192, 1)",
+                borderWidth: 2,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true, suggestedMax: 5 } },
+          },
+        });
+
+        new Chart(document.getElementById("sleepChart").getContext("2d"), {
+          type: "bar",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Sleep (Hours)",
+                data: sleepData,
+                backgroundColor: "rgba(54, 162, 235, 0.2)",
+                borderColor: "rgba(54, 162, 235, 1)",
+                borderWidth: 2,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true, suggestedMax: 12 } },
+          },
+        });
+
+        new Chart(document.getElementById("energyChart").getContext("2d"), {
+          type: "bar",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Energy Level (1-10)",
+                data: energyData,
+                backgroundColor: "rgba(255, 99, 132, 0.2)",
+                borderColor: "rgba(255, 99, 132, 1)",
+                borderWidth: 2,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true, suggestedMax: 10 } },
+          },
+        });
+      }
+
+      // Fetch mood data on page load
+      fetchMoodData();
+    </script>
+  </body>
+</html>
