@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Self-Help Resources</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #dbe9f4, #e6f4ea);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .content-wrapper {
+      background-color: #ffffffee;
+      margin: 40px 20px;
+      padding: 30px 40px;
+      border-radius: 15px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      max-width: 800px;
+      width: 100%;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #2c3e50;
+    }
+
+    p {
+      color: #34495e;
+      margin-bottom: 25px;
+    }
+
+    .resource-card {
+      border: 1px solid #ddd;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      background-color: #fdfdfd;
+      text-align: left;
+    }
+
+    .resource-category {
+      display: inline-block;
+      background-color: #f0f0f0;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 0.85em;
+      margin-bottom: 10px;
+    }
+
+    .resource-title {
+      font-size: 1.3em;
+      margin: 10px 0 5px;
+      color: #2c3e50;
+    }
+
+    .resource-description {
+      color: #555;
+      margin-bottom: 10px;
+    }
+
+    .resource-link {
+      color: #0066cc;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .resource-link:hover {
+      text-decoration: underline;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 20px;
+      color: #70c1b3;
+      text-decoration: none;
+      font-weight: bold;
+      transition: color 0.3s ease;
+    }
+
+    .back-link:hover {
+      color: #5ba9a0;
+    }
+  </style>
+</head>
+<body>
+  <div class="content-wrapper">
+    <h1>🌱 Self-Help Resources</h1>
+    <p>Explore these resources to support your mental health journey:</p>
+
+    <div th:each="resource : ${resources}" class="resource-card">
+      <div class="resource-category" th:text="${resource.category}"></div>
+      <h3 class="resource-title" th:text="${resource.title}"></h3>
+      <p class="resource-description" th:text="${resource.description}"></p>
+      <a th:href="${resource.url}" class="resource-link" target="_blank">View Resource</a>
+    </div>
+
+    <a href="/dashboard" class="back-link">← Back to Dashboard</a>
+  </div>
+</body>
+</html>

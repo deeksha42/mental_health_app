@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <title>View Journal Entry</title>
+    <link rel="stylesheet" href="/css/style_journal.css" />
+    <style>
+      body {
+        background: linear-gradient(to right, #dbe9f4, #e6f4ea);
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .container {
+        width: 100%;
+        max-width: 800px;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 30px 20px;
+        box-sizing: border-box;
+      }
+      h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 24px;
+      }
+      p {
+        font-size: 16px;
+        line-height: 1.6;
+        margin-bottom: 12px;
+      }
+      strong {
+        font-weight: bold;
+      }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 20px;
+      }
+      .btn {
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 14px;
+        cursor: pointer;
+        border: none;
+      }
+      .finalize {
+        background-color: #4caf50;
+        color: white;
+      }
+      .edit {
+        background-color: #007bff;
+        color: white;
+      }
+      .delete {
+        background-color: #f44336;
+        color: white;
+      }
+      .btn:hover {
+        opacity: 0.85;
+      }
+      .back {
+        display: block;
+        margin-top: 30px;
+        text-align: center;
+        font-size: 16px;
+        color: #007bff;
+        text-decoration: none;
+      }
+      .back:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2 th:text="${entry.title}">Journal Title</h2>
+      <p>
+        <strong>Date:</strong> <span th:text="${entry.date}">2025-04-16</span>
+      </p>
+      <p>
+        <strong>Status:</strong> <span th:text="${entry.status}">Draft</span>
+      </p>
+      <p th:text="${entry.content}">Journal content goes here...</p>
+
+      <div class="actions">
+        <form
+          th:if="${editable}"
+          th:action="@{|/journals/finalize/${entry.id}|}"
+          method="post"
+        >
+          <button class="btn finalize" type="submit">Finalize and Save</button>
+        </form>
+
+        <a th:if="${editable}" th:href="@{|/journals/edit/${entry.id}|}">
+          <button class="btn edit" type="button">Edit</button>
+        </a>
+
+        <form th:action="@{|/journals/delete/${entry.id}|}" method="post">
+          <button class="btn delete" type="submit">Delete</button>
+        </form>
+      </div>
+
+      <a href="/journals" class="back">← Back to entries</a>
+    </div>
+  </body>
+</html>

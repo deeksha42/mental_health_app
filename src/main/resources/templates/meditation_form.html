@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Meditation Form</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(to right, #dbe9f4, #e6f4ea);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+
+      .container {
+        background-color: #ffffffee;
+        padding: 30px 40px;
+        border-radius: 15px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        max-width: 400px;
+      }
+
+      h1 {
+        font-size: 24px;
+        margin-bottom: 20px;
+        color: #2c3e50;
+      }
+
+      label {
+        display: block;
+        margin: 15px 0 5px;
+        font-weight: bold;
+        color: #34495e;
+      }
+
+      select,
+      button {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+      }
+
+      button {
+        background-color: #70c1b3;
+        color: white;
+        font-weight: bold;
+        margin-top: 20px;
+        border: none;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+
+      button:hover {
+        background-color: #5ba9a0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🧘 Start Meditation</h1>
+      <form method="post" action="/meditation/start">
+        <label for="type">Choose a sound:</label>
+        <select name="type" id="type" required>
+          <option value="rain">Rain</option>
+          <option value="ocean">Ocean</option>
+          <option value="white_noise">White Noise</option>
+        </select>
+
+        <label for="duration">Choose duration (minutes):</label>
+        <select name="duration" id="duration" required>
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="15">15</option>
+        </select>
+
+        <button type="submit">Start Session</button>
+        <a href="/dashboard" class="back">← Back to dashboard</a>
+      </form>
+    </div>
+  </body>
+</html>

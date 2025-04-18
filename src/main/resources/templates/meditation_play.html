@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <title>Meditation Session</title>
+    <style>
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background: linear-gradient(to bottom, #f0f9ff, #cbebf7);
+        text-align: center;
+        padding: 40px;
+        color: #333;
+      }
+
+      h1 {
+        font-size: 2.2rem;
+        margin-bottom: 10px;
+      }
+
+      .circle {
+        width: 160px;
+        height: 160px;
+        background-color: #a3d5d3;
+        border-radius: 50%;
+        margin: 30px auto;
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.1);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      .controls {
+        margin-top: 20px;
+      }
+
+      button {
+        margin: 5px;
+        padding: 10px 20px;
+        border: none;
+        background-color: #4caf50;
+        color: white;
+        font-size: 1rem;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #45a049;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .complete-message {
+        font-size: 1.5rem;
+        color: #4caf50;
+        margin-top: 30px;
+      }
+    </style>
+  </head>
+
+  <!-- ✅ Correct Thymeleaf binding for data attributes -->
+  <body th:attr="data-type=${type}, data-duration=${duration}">
+    <h1>🧘 Meditation Session</h1>
+
+    <p><strong>Type:</strong> <span th:text="${type}">rain</span></p>
+    <p>
+      <strong>Duration:</strong> <span th:text="${duration}">5</span> minutes
+    </p>
+    <p><strong>Time Left:</strong> <span id="timer">00:00</span></p>
+
+    <div class="circle"></div>
+
+    <audio id="audio" autoplay>
+      <source th:src="@{'/audio/' + ${type} + '.mp3'}" type="audio/mpeg" />
+      Your browser does not support the audio element.
+    </audio>
+
+    <div class="controls">
+      <button onclick="togglePause()" id="pauseBtn">⏸️ Pause</button>
+      <button onclick="goBack()">🔙 Back</button>
+    </div>
+
+    <div id="complete" class="complete-message hidden">
+      ✅ Session Complete! Take a deep breath.
+    </div>
+
+    <script>
+      const body = document.body;
+      const duration = parseInt(body.dataset.duration); // ✅ This should now return a number
+      const type = body.dataset.type;
+
+      let remaining = duration * 60;
+      let paused = false;
+
+      const timerElement = document.getElementById("timer");
+      const audio = document.getElementById("audio");
+      const pauseBtn = document.getElementById("pauseBtn");
+      const completeMessage = document.getElementById("complete");
+
+      function updateTimer() {
+        if (!paused && remaining > 0) {
+          const minutes = Math.floor(remaining / 60);
+          const seconds = remaining % 60;
+          timerElement.textContent = `${minutes
+            .toString()
+            .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+
+          // Fade out near end
+          if (remaining <= 10) {
+            audio.volume = remaining / 10;
+          }
+
+          remaining--;
+        } else if (remaining === 0) {
+          timerElement.textContent = "00:00";
+          audio.pause();
+          audio.currentTime = 0;
+          clearInterval(timerInterval);
+          completeMessage.classList.remove("hidden");
+        }
+      }
+
+      const timerInterval = setInterval(updateTimer, 1000);
+      updateTimer(); // initial call
+
+      function togglePause() {
+        paused = !paused;
+        if (paused) {
+          pauseBtn.innerText = "▶️ Resume";
+          audio.pause();
+        } else {
+          pauseBtn.innerText = "⏸️ Pause";
+          audio.play();
+        }
+      }
+
+      function goBack() {
+        window.location.href = "/meditation";
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mood Tracking</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #dbe9f4, #e6f4ea);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            justify-content: center;
+        }
+        .content {
+            padding: 20px;
+            width: 80%;
+            max-width: 800px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #70c1b3;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: #5ba9a0;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 26px;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .submit-btn {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="content">
+        <h1>Daily Mood Tracker</h1><br><br>
+        <div class="container">
+            <h2>How was your day?</h2>
+
+            <label for="date">Select Date:</label>
+            <input type="date" id="date">
+
+            <label for="mood">Current Mood:</label>
+            <select id="mood">
+                <option value="Happy">😊 Happy</option>
+                <option value="Stressed">😟 Stressed</option>
+                <option value="Anxious">😰 Anxious</option>
+                <option value="Neutral">😐 Neutral</option>
+                <option value="Excited">🤩 Excited</option>
+            </select>
+
+            <label for="sleep">Hours of Sleep:</label>
+            <input type="range" id="sleep" min="1" max="12" value="1">
+            <span id="sleepValue">1 hours</span>
+
+            <label for="energy">Energy Level:</label>
+            <input type="range" id="energy" min="1" max="10" value="1">
+            <span id="energyValue">1</span>
+
+            <label for="stress">Stress Level:</label>
+            <input type="range" id="stress" min="1" max="10" value="1">
+            <span id="stressValue">1</span><br><br>
+            <button class="submit-btn" onclick="saveMood()">Submit</button>
+        </div>
+    </div>
+
+    <a href="/dashboard" class="back-link">← Back to Dashboard</a>
+
+    <script>
+        document.getElementById('sleep').addEventListener('input', function() {
+            document.getElementById('sleepValue').textContent = this.value + " hours";
+        });
+
+        document.getElementById('energy').addEventListener('input', function() {
+            document.getElementById('energyValue').textContent = this.value;
+        });
+
+        document.getElementById('stress').addEventListener('input', function() {
+            document.getElementById('stressValue').textContent = this.value;
+        });
+
+        function saveMood() {
+            const moodData = {
+                date: document.getElementById('date').value || new Date().toISOString().split('T')[0],
+                mood: document.getElementById('mood').value,
+                sleep: document.getElementById('sleep').value,
+                energy: document.getElementById('energy').value,
+                stress: document.getElementById('stress').value,
+            };
+
+            fetch("http://localhost:8080/api/mood/save", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(moodData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert("Mood data saved!");
+                window.location.href = "/dashboard";
+            })
+            .catch(error => console.error("Error saving mood data:", error));
+        }
+    </script>
+
+</body>
+</html>

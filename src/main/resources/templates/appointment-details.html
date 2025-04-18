@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(to right, #dbe9f4, #e6f4ea);
+        }
+        .details-container {
+            max-width: 600px;
+            width: 90%;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background-color: #ffffffee;
+        }
+        .detail-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .action-buttons {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .btn-start {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .btn-start:hover {
+            background-color: #45a049;
+        }
+        .btn-back {
+            background-color: #2196F3;
+            color: white;
+        }
+        .btn-back:hover {
+            background-color: #0b7dda;
+        }
+        .status {
+            font-weight: bold;
+        }
+        .status-scheduled {
+            color: #1565c0;
+        }
+    </style>
+</head>
+<body>
+    <div class="details-container">
+        <h1 style="text-align: center;">Appointment Details</h1>
+        
+        <div class="detail-item">
+            <strong>Therapist:</strong> <span th:text="${appointment.therapist.name}"></span>
+        </div>
+        <div class="detail-item">
+            <strong>Date:</strong> <span th:text="${#temporals.format(appointment.dateTime, 'MMMM dd, yyyy')}"></span>
+        </div>
+        <div class="detail-item">
+            <strong>Time:</strong> <span th:text="${#temporals.format(appointment.dateTime, 'hh:mm a')}"></span>
+        </div>
+        <div class="detail-item">
+            <strong>Status:</strong> 
+            <span class="status status-scheduled" th:text="${#strings.capitalize(#strings.toLowerCase(appointment.status).replace('_', ' '))}"></span>
+        </div>
+        
+        <div class="action-buttons">
+            <form th:if="${appointment.status.name() == 'SCHEDULED'}" 
+                  th:action="@{/appointments/start/{id}(id=${appointment.id})}" 
+                  method="post">
+                <button type="submit" class="btn btn-start">Start Session</button>
+            </form>
+            <a th:href="@{/appointments/history?clientName={name}(name=${appointment.clientName})}" 
+               class="btn btn-back">Back to Appointments</a>
+        </div>
+    </div>
+</body>
+</html>

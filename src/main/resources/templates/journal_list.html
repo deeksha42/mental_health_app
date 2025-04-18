@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <title>Journal Entries</title>
+    <link rel="stylesheet" href="/css/style_journal.css" />
+    <style>
+      body {
+        background: linear-gradient(to right, #dbe9f4, #e6f4ea);
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .container {
+        width: 100%;
+        max-width: 800px;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 30px 20px;
+        box-sizing: border-box;
+      }
+      h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 24px;
+      }
+      .entry-list {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+      }
+      .card {
+        background-color: #fff;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 8px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .card a {
+        text-decoration: none;
+        color: #333;
+        font-size: 18px;
+        font-weight: bold;
+        flex-grow: 1;
+      }
+      .card .status {
+        font-size: 14px;
+        color: #777;
+        margin-left: 10px;
+        white-space: nowrap;
+      }
+      .btn.create {
+        display: block;
+        width: 200px;
+        margin: 20px auto;
+        padding: 10px;
+        background-color: #4caf50;
+        color: white;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 16px;
+      }
+      .btn.create:hover {
+        background-color: #45a049;
+      }
+      .back {
+        display: block;
+        margin-top: 30px;
+        text-align: center;
+        font-size: 16px;
+        color: #007bff;
+        text-decoration: none;
+      }
+      .back:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Your Journal Entries</h2>
+      <a href="/journals/new" class="btn create">+ New Entry</a>
+      <ul class="entry-list">
+        <li th:each="entry : ${entries}" class="card">
+          <a th:href="@{|/journals/${entry.id}|}" th:text="${entry.title}"></a>
+          <span class="status" th:text="${entry.status}"></span>
+        </li>
+      </ul>
+      <a href="/dashboard" class="back">← Back to dashboard</a>
+    </div>
+  </body>
+</html>
