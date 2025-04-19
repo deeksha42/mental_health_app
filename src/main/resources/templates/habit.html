@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Habit Tracker</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -71,6 +72,25 @@
         .back-link:hover {
             color: #5ba9a0;
         }
+
+        .chart-section {
+            margin-top: 40px;
+            width: 100%;
+        }
+
+        .habit-chart {
+            max-width: 400px;
+            margin: 30px auto;
+        }
+
+        .habit-chart h4 {
+            text-align: center;
+        }
+
+        #habitBarChart {
+            max-width: 600px;
+            margin: 50px auto;
+        }
     </style>
 </head>
 <body>
@@ -107,9 +127,19 @@
         <tbody></tbody>
     </table>
 </div>
+<!-- Pie Chart Container -->
+<div id="habitPieCharts" style="display: flex; flex-wrap: nowrap; gap: 30px; overflow-x: auto; margin-top: 10px; margin-bottom: 30px;"></div>
+<!-- Bar Graph Container -->
+<div style="width: 100%; max-width: 800px; margin-top: 10px;">
+    <canvas id="habitBarChart"></canvas>
+</div>
+
+
+
 
 <a href="/dashboard" class="back-link">← Back to Dashboard</a>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     const allDates = [];
     for (let i = 1; i <= 30; i++) {
@@ -118,28 +148,101 @@
 
     let currentWeekIndex = 0;
     const daysPerWeek = 7;
+    let barChart = null;
 
     function getWeekDates() {
         const start = currentWeekIndex * daysPerWeek;
         return allDates.slice(start, start + daysPerWeek);
     }
 
+    function renderPieCharts(habits) {
+        const chartContainer = document.getElementById("habitPieCharts");
+        chartContainer.innerHTML = '';
+
+        habits.forEach((habit, i) => {
+            const completed = habit.completedDates.length;
+            const remaining = Math.max(habit.goal - completed, 0);
+
+            const canvas = document.createElement('canvas');
+            canvas.id = 'chart-' + i;
+            canvas.style.width = '150px';
+            canvas.style.height = '150px';
+
+            const wrapper = document.createElement('div');
+            wrapper.style.display = 'flex';
+            wrapper.style.flexDirection = 'column';
+            wrapper.style.alignItems = 'center';
+
+            const label = document.createElement('div');
+            label.innerText = habit.name;
+            label.style.marginBottom = '5px';
+            label.style.fontWeight = 'bold';
+
+            wrapper.appendChild(label);
+            wrapper.appendChild(canvas);
+            chartContainer.appendChild(wrapper);
+
+            new Chart(canvas.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: ['Completed', 'Remaining'],
+                    datasets: [{
+                        data: [completed, remaining],
+                        backgroundColor: ['#70c1b3', '#f4d35e']
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        });
+    }
+
+    function renderBarChart(habits) {
+        const ctx = document.getElementById('habitBarChart').getContext('2d');
+        const labels = habits.map(h => h.name);
+        const data = habits.map(h => h.completedDates.length);
+
+        if (barChart) barChart.destroy(); // destroy previous instance
+
+        barChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Completed Days',
+                    data: data,
+                    backgroundColor: '#70c1b3'
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        precision: 0
+                    }
+                }
+            }
+        });
+    }
+
     function renderTable(habits) {
         const tbody = $("#habitTable tbody").empty();
         const theadRow = $("#habitTable thead tr");
 
-        // Clear all date headers except first 4 fixed headers
         theadRow.find("th:gt(3)").remove();
 
         const weekDates = getWeekDates();
 
-        // Add date headers
         weekDates.forEach(date => {
             const day = parseInt(date.split("-")[2]);
             theadRow.append(`<th class="sticky">Apr ${day}</th>`);
         });
 
-        // Add Next button at right
         theadRow.append(`<th class="sticky right-nav-button"><button onclick="nextWeek()">Next ➡️</button></th>`);
 
         habits.forEach(habit => {
@@ -158,20 +261,20 @@
                 </td>
             `);
 
-            // Empty gap cell (to align with Prev button)
             row.append(`<td></td>`);
 
-            // Tick marks for current week
             weekDates.forEach(date => {
                 const tick = habit.completedDates.includes(date) ? '✔️' : '';
                 row.append(`<td>${tick}</td>`);
             });
 
-            // Final gap for next button
             row.append(`<td></td>`);
 
             tbody.append(row);
         });
+
+        renderBarChart(habits);
+        renderPieCharts(habits);
     }
 
     function fetchHabits() {
