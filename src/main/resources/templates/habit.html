@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Habit Tracker</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #dbe9f4, #e6f4ea);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .progress-container {
+            width: 150px;
+            height: 20px;
+            background-color: #ddd;
+            border-radius: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        .progress-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            z-index: 1;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            overflow-x: auto;
+        }
+        th, td {
+            border: 1px solid #aaa;
+            padding: 4px;
+            text-align: center;
+        }
+        th.sticky {
+            position: sticky;
+            top: 0;
+            background-color: #f5f5f5;
+            z-index: 2;
+        }
+        .nav-button-cell {
+            width: 100px;
+        }
+        .right-nav-button {
+            position: sticky;
+            right: 0;
+            background-color: #f5f5f5;
+            z-index: 2;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #70c1b3;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: #5ba9a0;
+        }
+
+        .chart-section {
+            margin-top: 40px;
+            width: 100%;
+        }
+
+        .habit-chart {
+            max-width: 400px;
+            margin: 30px auto;
+        }
+
+        .habit-chart h4 {
+            text-align: center;
+        }
+
+        #habitBarChart {
+            max-width: 600px;
+            margin: 50px auto;
+        }
+    </style>
+</head>
+<body>
+<h1>Habit Tracker</h1>
+<h2>Add New Habit</h2>
+<form id="addHabitForm">
+    <input type="text" id="habitName" placeholder="Name" required>
+    <input type="number" id="habitGoal" placeholder="Goal" required>
+    <button type="submit">Add</button>
+</form>
+
+<h2>Update Habit</h2>
+<form id="updateHabitForm">
+    <input type="text" id="updateName" placeholder="Name" required>
+    <input type="date" id="updateDate" required>
+    <button type="submit">Update</button>
+</form>
+
+<h2>Habits</h2>
+
+<div style="overflow-x:auto;">
+    <table id="habitTable">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Goal</th>
+            <th>Progress</th>
+            <th class="sticky nav-button-cell">
+                <button onclick="prevWeek()">⬅️ Prev</button>
+            </th>
+            <!-- Dates and right arrow will be injected here -->
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+<!-- Pie Chart Container -->
+<div id="habitPieCharts" style="display: flex; flex-wrap: nowrap; gap: 30px; overflow-x: auto; margin-top: 10px; margin-bottom: 30px;"></div>
+<!-- Bar Graph Container -->
+<div style="width: 100%; max-width: 800px; margin-top: 10px;">
+    <canvas id="habitBarChart"></canvas>
+</div>
+
+
+
+
+<a href="/dashboard" class="back-link">← Back to Dashboard</a>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const allDates = [];
+    for (let i = 1; i <= 30; i++) {
+        allDates.push(`2025-04-${i.toString().padStart(2, '0')}`);
+    }
+
+    let currentWeekIndex = 0;
+    const daysPerWeek = 7;
+    let barChart = null;
+
+    function getWeekDates() {
+        const start = currentWeekIndex * daysPerWeek;
+        return allDates.slice(start, start + daysPerWeek);
+    }
+
+    function renderPieCharts(habits) {
+        const chartContainer = document.getElementById("habitPieCharts");
+        chartContainer.innerHTML = '';
+
+        habits.forEach((habit, i) => {
+            const completed = habit.completedDates.length;
+            const remaining = Math.max(habit.goal - completed, 0);
+
+            const canvas = document.createElement('canvas');
+            canvas.id = 'chart-' + i;
+            canvas.style.width = '150px';
+            canvas.style.height = '150px';
+
+            const wrapper = document.createElement('div');
+            wrapper.style.display = 'flex';
+            wrapper.style.flexDirection = 'column';
+            wrapper.style.alignItems = 'center';
+
+            const label = document.createElement('div');
+            label.innerText = habit.name;
+            label.style.marginBottom = '5px';
+            label.style.fontWeight = 'bold';
+
+            wrapper.appendChild(label);
+            wrapper.appendChild(canvas);
+            chartContainer.appendChild(wrapper);
+
+            new Chart(canvas.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: ['Completed', 'Remaining'],
+                    datasets: [{
+                        data: [completed, remaining],
+                        backgroundColor: ['#70c1b3', '#f4d35e']
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        });
+    }
+
+    function renderBarChart(habits) {
+        const ctx = document.getElementById('habitBarChart').getContext('2d');
+        const labels = habits.map(h => h.name);
+        const data = habits.map(h => h.completedDates.length);
+
+        if (barChart) barChart.destroy(); // destroy previous instance
+
+        barChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Completed Days',
+                    data: data,
+                    backgroundColor: '#70c1b3'
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        precision: 0
+                    }
+                }
+            }
+        });
+    }
+
+    function renderTable(habits) {
+        const tbody = $("#habitTable tbody").empty();
+        const theadRow = $("#habitTable thead tr");
+
+        theadRow.find("th:gt(3)").remove();
+
+        const weekDates = getWeekDates();
+
+        weekDates.forEach(date => {
+            const day = parseInt(date.split("-")[2]);
+            theadRow.append(`<th class="sticky">Apr ${day}</th>`);
+        });
+
+        theadRow.append(`<th class="sticky right-nav-button"><button onclick="nextWeek()">Next ➡️</button></th>`);
+
+        habits.forEach(habit => {
+            const progress = (habit.completedDates.length / habit.goal) * 100;
+            const progressColor = progress >= 100 ? 'green' : progress > 50 ? 'yellow' : 'red';
+
+            const row = $("<tr></tr>");
+            row.append(`<td>${habit.name}</td>`);
+            row.append(`<td>${habit.goal}</td>`);
+            row.append(`
+                <td>
+                    <div class="progress-container" title="${Math.round(progress)}%">
+                        <div class="progress-bar" style="width:${progress}%; background:${progressColor}"></div>
+                        <div class="progress-text">${habit.completedDates.length}/${habit.goal}</div>
+                    </div>
+                </td>
+            `);
+
+            row.append(`<td></td>`);
+
+            weekDates.forEach(date => {
+                const tick = habit.completedDates.includes(date) ? '✔️' : '';
+                row.append(`<td>${tick}</td>`);
+            });
+
+            row.append(`<td></td>`);
+
+            tbody.append(row);
+        });
+
+        renderBarChart(habits);
+        renderPieCharts(habits);
+    }
+
+    function fetchHabits() {
+        $.get("/api/habits", function(data) {
+            renderTable(data);
+        });
+    }
+
+    function prevWeek() {
+        if (currentWeekIndex > 0) {
+            currentWeekIndex--;
+            fetchHabits();
+        }
+    }
+
+    function nextWeek() {
+        const maxWeek = Math.floor((allDates.length - 1) / daysPerWeek);
+        if (currentWeekIndex < maxWeek) {
+            currentWeekIndex++;
+            fetchHabits();
+        }
+    }
+
+    $("#addHabitForm").submit(function(e) {
+        e.preventDefault();
+        const habit = {
+            name: $("#habitName").val(),
+            goal: parseInt($("#habitGoal").val())
+        };
+        $.ajax({
+            url: "/api/habits/add",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(habit),
+            success: function() {
+                fetchHabits();
+                $("#addHabitForm")[0].reset();
+            },
+            error: function(xhr) {
+                alert("Failed to add habit: " + (xhr.responseJSON?.error || "unknown error"));
+            }
+        });
+    });
+
+    $("#updateHabitForm").submit(function(e) {
+        e.preventDefault();
+        const updateData = {
+            name: $("#updateName").val(),
+            date: $("#updateDate").val()
+        };
+        $.ajax({
+            url: "/api/habits/update",
+            type: "POST",
+            data: JSON.stringify(updateData),
+            contentType: "application/json",
+            success: function() {
+                fetchHabits();
+            },
+            error: function() {
+                alert("Error updating habit");
+            }
+        });
+    });
+
+    fetchHabits();
+</script>
+
+</body>
+</html>
